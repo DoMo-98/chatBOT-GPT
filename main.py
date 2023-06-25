@@ -1,7 +1,6 @@
 """This module contains the main function for the telegram_bot."""
 
 import os
-from dotenv import load_dotenv
 import logging
 import tempfile
 # import pickle
@@ -9,7 +8,8 @@ from gtts import gTTS
 from telegram import Update, InputFile, File, ChatAction
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
-import requests
+import aiohttp
+import asyncio
 import json
 
 import openai
@@ -19,40 +19,33 @@ from io import BytesIO
 from langdetect import detect
 
 from functools import wraps
-import threading
-import time
 
-class TypingThread(threading.Thread):
-    def __init__(self, chat_id, bot, action):
-        super().__init__()
-        self.chat_id = chat_id
-        self.bot = bot
-        self.action = action
-        self._stop_event = threading.Event()
-
-    def run(self):
-        while not self._stop_event.is_set():
-            self.bot.send_chat_action(chat_id=self.chat_id, action=self.action)
-            time.sleep(0.5)
-
-    def stop(self):
-        self._stop_event.set()
+async def typing(chat_id, bot, action):
+    while True:
+        bot.send_chat_action(chat_id=chat_id, action=action)
+        await asyncio.sleep(1)
 
 def send_action(action):
     """Sends `action` while processing func command."""
 
     def decorator(func):
         @wraps(func)
-        def command_func(update, context, *args, **kwargs):
-            typing_thread = TypingThread(update.effective_chat.id, context.bot, action)
-            typing_thread.start()
+        async def command_func(update, context, *args, **kwargs):
+            # typing_thread = TypingThread(update.effective_chat.id, context.bot, action)
+            # typing_thread.start()
+            typing_task = asyncio.create_task(typing(update.effective_chat.id, context.bot, action))
 
             # Ejecuta la función del handler
-            res = func(update, context)
+            res = await func(update, context)
 
             # Detiene el hilo de la acción de chat "escribiendo..."
-            typing_thread.stop()
-            typing_thread.join()
+            # typing_thread.stop()
+            # typing_thread.join()
+            typing_task.cancel()
+            try:
+                await typing_task
+            except asyncio.CancelledError:
+                print("typing_task cancelled")
             return res
         return command_func
 
@@ -60,8 +53,6 @@ def send_action(action):
 
 send_typing_action = send_action(ChatAction.TYPING)
 send_record_voice_action = send_action(ChatAction.RECORD_VOICE)
-
-load_dotenv()
 
 TELEGRAM_TOKEN: str = os.getenv("TELEGRAM_API_KEY")
 DEEPL_TOKEN: str = os.getenv("DEEPL_API_KEY")
@@ -72,7 +63,7 @@ TEMPLATE: list = []
 GPT3_MODEL: str = "gpt-3.5-turbo"
 GPT4_MODEL: str = "gpt-4"
 
-def gpt_request(text: str, messages: list, model: str) -> str:
+async def gpt_request(text: str, messages: list, model: str) -> str:
     """Ask something to GPT-3.5 Turbo."""
     if not text:
         return "empty message"
@@ -82,19 +73,23 @@ def gpt_request(text: str, messages: list, model: str) -> str:
         'Authorization': 'Bearer ' + OPENAI_TOKEN
     }
     messages.append({'role': 'user', 'content': text})
-    # messages.append({'role': 'user', 'content': text})
     data = {
         'model': model,
         'messages': messages,
         'temperature': TEMPERATURE,
     }
-    response = requests.post(url, headers=headers, data=json.dumps(data))
-    if response.status_code != 200 or "choices" not in response.json():
-        return response.text
-    content = response.json()['choices'][0]['message']['content']
-    messages.append({'role': 'assistant', 'content': content})
-    # messages.append({'role': 'assistant', 'content': content})
-    return content
+
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, headers=headers, data=json.dumps(data)) as response:
+            response_data = await response.text()
+            if response.status != 200:
+                return response_data
+            response_json = await response.json()
+            if "choices" not in response_json:
+                return response_data
+            content = response_json['choices'][0]['message']['content']
+            messages.append({'role': 'assistant', 'content': content})
+            return content
 
 def audio_to_text(audio: File) -> str:
     """Convert audio to text."""
@@ -148,10 +143,10 @@ def gpt_4(update: Update, context: CallbackContext) -> None:
     update.message.reply_text("Ahora usaré GPT-4.")
 
 @send_typing_action
-def get_text_from_text(update: Update, context: CallbackContext) -> None:
+async def get_text_from_text(update: Update, context: CallbackContext) -> None:
     if "messages" not in context.user_data:
         context.user_data['messages'] = TEMPLATE.copy()
-    response: str = gpt_request(
+    response: str = await gpt_request(
                         update.message.text, \
                         context.user_data['messages'], \
                         context.user_data.get("model", GPT3_MODEL)
@@ -159,10 +154,10 @@ def get_text_from_text(update: Update, context: CallbackContext) -> None:
     return response
 
 @send_record_voice_action
-def get_audio_from_text(update: Update, context: CallbackContext) -> None:
+async def get_audio_from_text(update: Update, context: CallbackContext) -> None:
     if "messages" not in context.user_data:
         context.user_data['messages'] = TEMPLATE.copy()
-    response: str = gpt_request(
+    response: str = await gpt_request(
                         update.message.text, \
                         context.user_data['messages'], \
                         context.user_data.get("model", GPT3_MODEL)
@@ -173,10 +168,10 @@ def get_audio_from_text(update: Update, context: CallbackContext) -> None:
     return audio_file_path
 
 @send_typing_action
-def get_text_from_audio(update: Update, context: CallbackContext) -> None:
+async def get_text_from_audio(update: Update, context: CallbackContext) -> None:
     if "messages" not in context.user_data:
         context.user_data['messages'] = TEMPLATE.copy()
-    response: str = gpt_request(
+    response: str = await gpt_request(
                         audio_to_text(context.bot.getFile(update.message.voice.file_id)), \
                         context.user_data['messages'], \
                         context.user_data.get("model", GPT3_MODEL)
@@ -184,10 +179,10 @@ def get_text_from_audio(update: Update, context: CallbackContext) -> None:
     return response
 
 @send_record_voice_action
-def get_audio_from_audio(update: Update, context: CallbackContext) -> None:
+async def get_audio_from_audio(update: Update, context: CallbackContext) -> None:
     if "messages" not in context.user_data:
         context.user_data['messages'] = TEMPLATE.copy()
-    response: str = gpt_request(
+    response: str = await gpt_request(
                         audio_to_text(context.bot.getFile(update.message.voice.file_id)), \
                         context.user_data['messages'], \
                         context.user_data.get("model", GPT3_MODEL)
@@ -200,7 +195,7 @@ def get_audio_from_audio(update: Update, context: CallbackContext) -> None:
 def handle_text(update: Update, context: CallbackContext) -> None:
     if "send_audio" in context.user_data and context.user_data['send_audio']:
         # Convertir texto a audio usando gTTS y la función convert_text_to_audio
-        audio_file_path = get_audio_from_text(update, context)
+        audio_file_path = asyncio.run( get_audio_from_text(update, context) )
 
         # Enviar audio como respuesta
         with open(audio_file_path, "rb") as audio_file:
@@ -210,14 +205,14 @@ def handle_text(update: Update, context: CallbackContext) -> None:
             )
     else:
         update.message.reply_text(
-            get_text_from_text(update, context), \
+            asyncio.run( get_text_from_text(update, context) ), \
             reply_to_message_id = update.message.message_id
         )
 
 def handle_audio(update: Update, context: CallbackContext) -> None:
     if "send_audio" in context.user_data and context.user_data['send_audio']:
         # Convertir texto a audio usando gTTS y la función convert_text_to_audio
-        audio_file_path = get_audio_from_audio(update, context)
+        audio_file_path = asyncio.run( get_audio_from_audio(update, context) )
 
         # Enviar audio como respuesta
         with open(audio_file_path, "rb") as audio_file:
@@ -227,7 +222,7 @@ def handle_audio(update: Update, context: CallbackContext) -> None:
             )
     else:
         update.message.reply_text(
-            get_text_from_audio(update, context), \
+            asyncio.run( get_text_from_audio(update, context) ), \
             reply_to_message_id = update.message.message_id
         )
 
