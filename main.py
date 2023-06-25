@@ -95,7 +95,7 @@ async def gpt_request(text: str, messages: list, model: str) -> str:
             messages.append({'role': 'assistant', 'content': content})
             return content
 
-def audio_to_text(audio: File) -> str:
+async def audio_to_text(audio: File) -> str:
     """Convert audio to text."""
     # Descargar el archivo de audio en un objeto BytesIO
     audio_data = BytesIO()
@@ -113,9 +113,9 @@ def audio_to_text(audio: File) -> str:
 
     # Cargar el objeto BytesIO directamente en la función de transcripción
     openai.api_key = OPENAI_TOKEN
-    transcript = openai.Audio.transcribe(WHISPER_MODEL, wav_data)['text']
+    transcript = await openai.Audio.atranscribe(WHISPER_MODEL, wav_data)
 
-    return transcript
+    return transcript['text']
 
 def start(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /start is issued."""
@@ -177,7 +177,7 @@ async def get_text_from_audio(update: Update, context: CallbackContext) -> None:
     if "messages" not in context.user_data:
         context.user_data['messages'] = TEMPLATE.copy()
     response: str = await gpt_request(
-                        audio_to_text(context.bot.getFile(update.message.voice.file_id)), \
+                        await audio_to_text(context.bot.getFile(update.message.voice.file_id)), \
                         context.user_data['messages'], \
                         context.user_data.get("model", GPT3_MODEL)
                     )
@@ -188,7 +188,7 @@ async def get_audio_from_audio(update: Update, context: CallbackContext) -> None
     if "messages" not in context.user_data:
         context.user_data['messages'] = TEMPLATE.copy()
     response: str = await gpt_request(
-                        audio_to_text(context.bot.getFile(update.message.voice.file_id)), \
+                        await audio_to_text(context.bot.getFile(update.message.voice.file_id)), \
                         context.user_data['messages'], \
                         context.user_data.get("model", GPT3_MODEL)
                     )
