@@ -1,6 +1,7 @@
 """This module contains the main function for the telegram_bot."""
 
 import os
+from dotenv import load_dotenv
 import logging
 import tempfile
 # import pickle
@@ -53,6 +54,8 @@ def send_action(action):
 
 send_typing_action = send_action(ChatAction.TYPING)
 send_record_voice_action = send_action(ChatAction.RECORD_VOICE)
+
+load_dotenv()
 
 TELEGRAM_TOKEN: str = os.getenv("TELEGRAM_API_KEY")
 DEEPL_TOKEN: str = os.getenv("DEEPL_API_KEY")
@@ -108,6 +111,7 @@ def audio_to_text(audio: File) -> str:
     wav_data.name = "temp_audio.wav"
 
     # Cargar el objeto BytesIO directamente en la función de transcripción
+    openai.api_key = OPENAI_TOKEN
     transcript = openai.Audio.transcribe("whisper-1", wav_data)['text']
 
     return transcript
