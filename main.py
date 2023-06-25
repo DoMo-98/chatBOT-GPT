@@ -63,6 +63,7 @@ OPENAI_TOKEN: str = os.getenv("OPENAI_API_KEY")
 
 TEMPERATURE: float = 0.7
 TEMPLATE: list = []
+WHISPER_MODEL = "whisper-1"
 GPT3_MODEL: str = "gpt-3.5-turbo"
 GPT4_MODEL: str = "gpt-4"
 
@@ -112,7 +113,7 @@ def audio_to_text(audio: File) -> str:
 
     # Cargar el objeto BytesIO directamente en la función de transcripción
     openai.api_key = OPENAI_TOKEN
-    transcript = openai.Audio.transcribe("whisper-1", wav_data)['text']
+    transcript = openai.Audio.transcribe(WHISPER_MODEL, wav_data)['text']
 
     return transcript
 

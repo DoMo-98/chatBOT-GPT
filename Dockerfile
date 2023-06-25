@@ -7,6 +7,9 @@ WORKDIR /app
 # Copiamos los archivos del directorio actual al contenedor
 COPY . /app
 
+# Actualizamos los índices de paquetes y luego instalamos ffmpeg
+RUN apk update && apk add ffmpeg
+
 # Instalamos las dependencias de Python
 RUN pip install --no-cache-dir --upgrade pip \
   && pip install --no-cache-dir -r requirements.txt
