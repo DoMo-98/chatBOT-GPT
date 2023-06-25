@@ -1,5 +1,5 @@
-# Utilizamos la imagen base de Python 3.9.17 con Alpine 3.18
-FROM python:3.9.17-alpine3.18
+# Utilizamos la imagen base de Python 3.11.4 con Alpine 3.18
+FROM python:3.11.4-alpine3.18
 
 # Establecemos el directorio de trabajo en el contenedor
 WORKDIR /app
