@@ -16,6 +16,9 @@ RUN chmod -R 444 app/ && adduser --disabled-password appuser
 # Switch to the non-root user
 USER appuser
 
+# Update PATH to include user local bin directory
+ENV PATH="/home/appuser/.local/bin:${PATH}"
+
 # Install Python dependencies
 RUN pip install --no-cache-dir --upgrade pip \
   && pip install --no-cache-dir -r requirements.txt
