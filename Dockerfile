@@ -1,19 +1,24 @@
-# Utilizamos la imagen base de Python 3.11.4 con Alpine 3.18
+# We use the base image of Python 3.11.4 with Alpine 3.18
 FROM python:3.11.4-alpine3.18
 
-# Establecemos el directorio de trabajo en el contenedor
+# Set the working directory in the container
 WORKDIR /app
 
-# Copiamos los archivos del directorio actual al contenedor
+# Copy the files from the current directory to the container
 COPY . /app
 
-# Actualizamos los índices de paquetes y luego instalamos ffmpeg
+# Update the package indexes and then install ffmpeg
 RUN apk update && apk add ffmpeg
 
-# Instalamos las dependencias de Python
+# Set permissions for the app directory and create a non-root user
+RUN chmod -R 444 app/ && adduser --disabled-password appuser
+
+# Switch to the non-root user
+USER appuser
+
+# Install Python dependencies
 RUN pip install --no-cache-dir --upgrade pip \
   && pip install --no-cache-dir -r requirements.txt
 
-# Ejecutamos el programa Python
+# Execute the Python program
 CMD ["python", "app/main.py"]
-
