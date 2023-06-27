@@ -1,27 +1,28 @@
 """This module contains the main function for the telegram_bot."""
 
-import os
-from dotenv import load_dotenv
-import logging
-import tempfile
-# import pickle
-from gtts import gTTS
-from telegram import Update, InputFile, File, ChatAction
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
-
-import aiohttp
+# Standard library imports
 import asyncio
 import json
-
-import openai
-from pydub import AudioSegment
+import logging
+import os
+import tempfile
+# import pickle
+from functools import wraps
 from io import BytesIO
 
+# Third party imports
+import aiohttp
+import openai
+from dotenv import load_dotenv
+from gtts import gTTS
 from langdetect import detect
+from pydub import AudioSegment
+from telegram import ChatAction, File, InputFile, Update
+from telegram.ext import CallbackContext, CommandHandler, Filters, MessageHandler, Updater
 
-from functools import wraps
 
 async def typing(chat_id, bot, action):
+    """Sends `action` while processing func command."""
     while True:
         bot.send_chat_action(chat_id=chat_id, action=action)
         await asyncio.sleep(1)
@@ -32,21 +33,15 @@ def send_action(action):
     def decorator(func):
         @wraps(func)
         async def command_func(update, context, *args, **kwargs):
-            # typing_thread = TypingThread(update.effective_chat.id, context.bot, action)
-            # typing_thread.start()
             typing_task = asyncio.create_task(typing(update.effective_chat.id, context.bot, action))
 
-            # Ejecuta la función del handler
             res = await func(update, context)
 
-            # Detiene el hilo de la acción de chat "escribiendo..."
-            # typing_thread.stop()
-            # typing_thread.join()
             typing_task.cancel()
             try:
                 await typing_task
             except asyncio.CancelledError:
-                print("typing_task cancelled")
+                logging.info("typing_task cancelled")
             return res
         return command_func
 
@@ -97,21 +92,21 @@ async def gpt_request(text: str, messages: list, model: str) -> str:
 
 async def audio_to_text(audio: File) -> str:
     """Convert audio to text."""
-    # Descargar el archivo de audio en un objeto BytesIO
+    # Download the audio file
     audio_data = BytesIO()
     audio.download(out=audio_data)
     audio_data.seek(0)
 
-    # Convertir el archivo de audio a formato WAV
+    # Convert the audio file to wav
     audio_segment = AudioSegment.from_ogg(audio_data)
     wav_data = BytesIO()
     audio_segment.export(wav_data, format='wav')
     wav_data.seek(0)
 
-    # Asignar un nombre arbitrario al objeto BytesIO
+    # Asign a name to the BytesIO object
     wav_data.name = "temp_audio.wav"
 
-    # Cargar el objeto BytesIO directamente en la función de transcripción
+    # Load the BytesIO object directly into the atranscribe function
     openai.api_key = OPENAI_TOKEN
     transcript = await openai.Audio.atranscribe(WHISPER_MODEL, wav_data)
 
@@ -149,6 +144,7 @@ def gpt_4(update: Update, context: CallbackContext) -> None:
 
 @send_typing_action
 async def get_text_from_text(update: Update, context: CallbackContext) -> None:
+    """Send a request to OpenAI API and get a response."""
     if "messages" not in context.user_data:
         context.user_data['messages'] = TEMPLATE.copy()
     response: str = await gpt_request(
@@ -160,6 +156,7 @@ async def get_text_from_text(update: Update, context: CallbackContext) -> None:
 
 @send_record_voice_action
 async def get_audio_from_text(update: Update, context: CallbackContext) -> None:
+    """Send a request to OpenAI API, get a response and convert it to audio."""
     if "messages" not in context.user_data:
         context.user_data['messages'] = TEMPLATE.copy()
     response: str = await gpt_request(
@@ -168,12 +165,12 @@ async def get_audio_from_text(update: Update, context: CallbackContext) -> None:
                         context.user_data.get("model", GPT3_MODEL)
                     )
     language: str = detect(response)
-    # Convertir texto a audio usando gTTS y la función convert_text_to_audio
     audio_file_path = text_to_audio(response, language)
     return audio_file_path
 
 @send_typing_action
 async def get_text_from_audio(update: Update, context: CallbackContext) -> None:
+    """Convert audio to text, send a request to OpenAI API and get a response."""
     if "messages" not in context.user_data:
         context.user_data['messages'] = TEMPLATE.copy()
     response: str = await gpt_request(
@@ -185,6 +182,7 @@ async def get_text_from_audio(update: Update, context: CallbackContext) -> None:
 
 @send_record_voice_action
 async def get_audio_from_audio(update: Update, context: CallbackContext) -> None:
+    """Convert audio to text, send a request to OpenAI API, get a response and convert it to audio."""
     if "messages" not in context.user_data:
         context.user_data['messages'] = TEMPLATE.copy()
     response: str = await gpt_request(
@@ -193,16 +191,14 @@ async def get_audio_from_audio(update: Update, context: CallbackContext) -> None
                         context.user_data.get("model", GPT3_MODEL)
                     )
     language: str = detect(response)
-    # Convertir texto a audio usando gTTS y la función convert_text_to_audio
     audio_file_path = text_to_audio(response, language)
     return audio_file_path
 
 def handle_text(update: Update, context: CallbackContext) -> None:
+    """Send a message when receiving a text message."""
     if "send_audio" in context.user_data and context.user_data['send_audio']:
-        # Convertir texto a audio usando gTTS y la función convert_text_to_audio
         audio_file_path = asyncio.run( get_audio_from_text(update, context) )
 
-        # Enviar audio como respuesta
         with open(audio_file_path, "rb") as audio_file:
             update.message.reply_voice(
                 voice=InputFile(audio_file), \
@@ -215,11 +211,10 @@ def handle_text(update: Update, context: CallbackContext) -> None:
         )
 
 def handle_audio(update: Update, context: CallbackContext) -> None:
+    """Send a message when receiving an audio or voice message."""
     if "send_audio" in context.user_data and context.user_data['send_audio']:
-        # Convertir texto a audio usando gTTS y la función convert_text_to_audio
         audio_file_path = asyncio.run( get_audio_from_audio(update, context) )
 
-        # Enviar audio como respuesta
         with open(audio_file_path, "rb") as audio_file:
             update.message.reply_voice(
                 voice=InputFile(audio_file), \
