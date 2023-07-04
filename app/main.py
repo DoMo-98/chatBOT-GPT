@@ -4,7 +4,6 @@
 import asyncio
 import json
 import logging
-import os
 import tempfile
 # import pickle
 from functools import wraps
@@ -13,12 +12,15 @@ from io import BytesIO
 # Third party imports
 import aiohttp
 import openai
-from dotenv import load_dotenv
 from gtts import gTTS
 from langdetect import detect
 from pydub import AudioSegment
 from telegram import ChatAction, File, InputFile, Update
 from telegram.ext import CallbackContext, CommandHandler, Filters, MessageHandler, Updater
+
+# Local application imports
+from constants import (GPT3_MODEL, OPENAI_TOKEN, TEMPERATURE, TEMPLATE, TELEGRAM_TOKEN, WHISPER_MODEL)
+from commands import (audio, gpt_3, gpt_4, new_chat, start, text)
 
 
 async def typing(chat_id, bot, action):
@@ -49,18 +51,6 @@ def send_action(action):
 
 send_typing_action = send_action(ChatAction.TYPING)
 send_record_voice_action = send_action(ChatAction.RECORD_VOICE)
-
-load_dotenv()
-
-TELEGRAM_TOKEN: str = os.getenv("TELEGRAM_API_KEY")
-DEEPL_TOKEN: str = os.getenv("DEEPL_API_KEY")
-OPENAI_TOKEN: str = os.getenv("OPENAI_API_KEY")
-
-TEMPERATURE: float = 0.7
-TEMPLATE: list = []
-WHISPER_MODEL = "whisper-1"
-GPT3_MODEL: str = "gpt-3.5-turbo"
-GPT4_MODEL: str = "gpt-4"
 
 async def gpt_request(text: str, messages: list, model: str) -> str:
     """Ask something to GPT-3.5 Turbo."""
@@ -111,36 +101,6 @@ async def audio_to_text(audio: File) -> str:
     transcript = await openai.Audio.atranscribe(WHISPER_MODEL, wav_data)
 
     return transcript['text']
-
-def start(update: Update, context: CallbackContext) -> None:
-    """Send a message when the command /start is issued."""
-    context.user_data['messages'] = TEMPLATE.copy()
-    update.message.reply_text("¡Hola! Soy un bot que recibe mensajes y audios.")
-
-def text(update: Update, context: CallbackContext):
-    """Send a message when the command /text is issued."""
-    context.user_data['send_audio'] = False
-    update.message.reply_text('Ahora enviaré mensajes de texto.')
-
-def audio(update: Update, context: CallbackContext):
-    """Send a message when the command /audio is issued."""
-    context.user_data['send_audio'] = True
-    update.message.reply_text('Ahora enviaré audios.')
-
-def new_chat(update: Update, context: CallbackContext) -> None:
-    """Send a message when the command /new is issued."""
-    context.user_data['messages'] = TEMPLATE.copy()
-    update.message.reply_text("¡Nuevo chat!")
-
-def gpt_3(update: Update, context: CallbackContext) -> None:
-    """Send a message when the command /gpt3 is issued."""
-    context.user_data['model'] = GPT3_MODEL
-    update.message.reply_text("Ahora usaré GPT-3.5-Turbo.")
-
-def gpt_4(update: Update, context: CallbackContext) -> None:
-    """Send a message when the command /gpt4 is issued."""
-    context.user_data['model'] = GPT4_MODEL
-    update.message.reply_text("Ahora usaré GPT-4.")
 
 @send_typing_action
 async def get_text_from_text(update: Update, context: CallbackContext) -> None:
