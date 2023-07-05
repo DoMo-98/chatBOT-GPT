@@ -3,6 +3,6 @@ services:
   app:
     build: .
     volumes:
-      - .:/app
-    command: ["python", "app/main.py"]
+      - .:/src
+    command: ["python", "src/main.py"]
 

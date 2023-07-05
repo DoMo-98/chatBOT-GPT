@@ -9,7 +9,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 TELEGRAM_TOKEN: str = os.getenv("TELEGRAM_API_KEY")
-DEEPL_TOKEN: str = os.getenv("DEEPL_API_KEY")
 OPENAI_TOKEN: str = os.getenv("OPENAI_API_KEY")
 
 TEMPERATURE: float = 0.7

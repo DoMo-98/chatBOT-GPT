@@ -5,13 +5,13 @@ import os
 def main():
     """Requests the tokens from the user and generates the .env file."""
     # Names of the tokens required for this application
-    tokens = ['OPENAI_API_KEY', 'TELEGRAM_API_KEY', 'DEEPL_API_KEY']
+    tokens = ['OPENAI_API_KEY', 'TELEGRAM_API_KEY']
 
     # Get the directory of the current script
     script_dir = os.path.dirname(os.path.realpath(__file__))
 
     # Combine the directory with the .env filename
-    env_path = os.path.join(script_dir, 'app/.env')
+    env_path = os.path.join(script_dir, 'src/.env')
 
     with open(env_path, 'w', encoding="utf-8") as _f:
         for token in tokens:
