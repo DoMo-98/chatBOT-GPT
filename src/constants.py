@@ -8,11 +8,16 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Tokens
 TELEGRAM_TOKEN: str = os.getenv("TELEGRAM_API_KEY")
 OPENAI_TOKEN: str = os.getenv("OPENAI_API_KEY")
 
+# Model Constants
 TEMPERATURE: float = 0.7
 TEMPLATE: list = []
 WHISPER_MODEL = "whisper-1"
 GPT3_MODEL: str = "gpt-3.5-turbo"
 GPT4_MODEL: str = "gpt-4"
+
+# HTTP Constants
+HTTP_OK = 200

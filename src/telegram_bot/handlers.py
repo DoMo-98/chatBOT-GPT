@@ -9,7 +9,7 @@ from telegram.ext import CallbackContext
 
 # Local application imports
 from constants import TEMPLATE
-from gpt_interactions.interactions import (get_audio_from_audio, get_audio_from_text,
+from telegram_bot.chat_interactions import (get_audio_from_audio, get_audio_from_text,
                                            get_text_from_audio, get_text_from_text)
 
 
