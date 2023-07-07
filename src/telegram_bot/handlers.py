@@ -20,12 +20,12 @@ def handle_text(update: Update, context: CallbackContext) -> None:
 
         with open(audio_file_path, "rb") as audio_file:
             update.message.reply_voice(
-                voice=InputFile(audio_file), \
+                voice=InputFile(audio_file),
                 reply_to_message_id=update.message.message_id
             )
     else:
         update.message.reply_text(
-            asyncio.run( get_text_from_text(update, context) ), \
+            asyncio.run( get_text_from_text(update, context) ),
             reply_to_message_id = update.message.message_id
         )
 
@@ -36,12 +36,12 @@ def handle_audio(update: Update, context: CallbackContext) -> None:
 
         with open(audio_file_path, "rb") as audio_file:
             update.message.reply_voice(
-                voice=InputFile(audio_file), \
+                voice=InputFile(audio_file),
                 reply_to_message_id=update.message.message_id
             )
     else:
         update.message.reply_text(
-            asyncio.run( get_text_from_audio(update, context) ), \
+            asyncio.run( get_text_from_audio(update, context) ),
             reply_to_message_id = update.message.message_id
         )
 
