@@ -7,7 +7,7 @@ import json
 import aiohttp
 
 # Local application imports
-from constants import (OPENAI_TOKEN, TEMPERATURE, HTTP_OK)
+from constants import (OPENAI_API_KEY, TEMPERATURE, HTTP_OK)
 
 
 async def construct_request_payload(text: str, messages: list, model: str) -> dict:
@@ -44,7 +44,7 @@ async def gpt_request(text: str, messages: list, model: str) -> str:
     url = 'https://api.openai.com/v1/chat/completions'
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + OPENAI_TOKEN
+        'Authorization': 'Bearer ' + OPENAI_API_KEY
     }
 
     data = await construct_request_payload(text, messages, model)

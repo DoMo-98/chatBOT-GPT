@@ -9,8 +9,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Tokens
-TELEGRAM_TOKEN: str = os.getenv("TELEGRAM_API_KEY")
-OPENAI_TOKEN: str = os.getenv("OPENAI_API_KEY")
+TELEGRAM_BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN")
+OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")
 
 # Model Constants
 TEMPERATURE: float = 0.7

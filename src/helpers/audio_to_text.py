@@ -9,7 +9,7 @@ from pydub import AudioSegment
 from telegram import File
 
 # Local application imports
-from constants import (OPENAI_TOKEN, WHISPER_MODEL)
+from constants import (OPENAI_API_KEY, WHISPER_MODEL)
 
 
 async def download_audio(audio: File) -> BytesIO:
@@ -31,7 +31,7 @@ async def transcribe_audio(wav_data: BytesIO) -> str:
     """Transcribe the audio using OpenAI's Whisper."""
     wav_data.name = "temp_audio.wav"
 
-    openai.api_key = OPENAI_TOKEN
+    openai.api_key = OPENAI_API_KEY
     transcript = await openai.Audio.atranscribe(WHISPER_MODEL, wav_data)
 
     # return transcript['text']

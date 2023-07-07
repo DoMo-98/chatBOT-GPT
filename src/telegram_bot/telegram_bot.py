@@ -7,7 +7,6 @@ import logging
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 
 # Local application imports
-from constants import TELEGRAM_TOKEN
 from telegram_bot.commands import audio, gpt_3, gpt_4, new_chat, start, text
 from telegram_bot.handlers import handle_audio, handle_text
 
