@@ -10,12 +10,49 @@ This project is a Telegram bot built in Python, which connects to the OpenAI API
 - OpenAI account and API key
 - ffmpeg (if not using Docker)
 
+If you don't have FFmpeg installed, you can do so by following these steps:
+
+### On Debian/Ubuntu-based systems:
+
+```
+sudo apt update
+sudo apt install ffmpeg
+```
+
+### On Red Hat/CentOS-based systems:
+
+```
+sudo yum install ffmpeg
+```
+
+### On macOS systems (using Homebrew):
+
+```
+brew install ffmpeg
+```
+
+### On Windows:
+
+Installing FFmpeg on Windows can be a bit more complex, as Windows does not include a package manager like apt or yum. Instead, you will need to manually download the software from the official FFmpeg page (https://ffmpeg.org/download.html), extract the files, and add the path to your system's PATH.
+
+### Installation Verification
+
+To verify that FFmpeg installed correctly, you can run the following command in your terminal:
+
+```
+ffmpeg -version
+```
+
+You should see output indicating the version of FFmpeg you have installed.
+
+Remember that these steps can vary depending on the specific operating system and its version. It's always a good idea to consult the official FFmpeg documentation for the most up-to-date installation instructions.
+
 ## Installation
 
 1. Clone this repository to your local machine:
 
 ```bash
-git clone https://github.com/your-username/your-repository.git
+git clone https://github.com/DoMo-98/privateBOT.git
 ```
 
 2. Navigate to the project directory:
@@ -44,7 +81,7 @@ python3 generate_env.py
 
 You can start the application in two ways:
 
-1. **Direct Python** - Run the `main.py` file:
+1. **Python** - Run the `main.py` file:
 
 ```bash
 python3 main.py
@@ -65,3 +102,7 @@ Contributions are welcome. To do so, please open an issue first to discuss what 
 ## License
 
 See the [LICENSE](LICENSE) file for more details.
+
+
+
+
