@@ -16,12 +16,12 @@ def start(update: Update, context: CallbackContext) -> None:
 def text(update: Update, context: CallbackContext):
     """Send a message when the command /text is issued."""
     context.user_data['send_audio'] = False
-    update.message.reply_text('I will now send text messages.')
+    update.message.reply_text("I will now send text messages.")
 
 def audio(update: Update, context: CallbackContext):
     """Send a message when the command /audio is issued."""
     context.user_data['send_audio'] = True
-    update.message.reply_text('I will now send voice messages.')
+    update.message.reply_text("I will now send voice messages.")
 
 def new_chat(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /new is issued."""
