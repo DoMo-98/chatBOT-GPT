@@ -7,7 +7,7 @@ import logging
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 
 # Local application imports
-from telegram_bot.commands import audio, gpt_3, gpt_4, new_chat, start, text
+from telegram_bot.commands import audio, gpt_3, gpt_4, help, new_chat, start, text
 from telegram_bot.handlers import handle_audio, handle_text
 
 
@@ -22,6 +22,7 @@ class TelegramBot:
 
     def setup_handlers(self):
         """Setup the handlers for the bot."""
+        self._dp.add_handler(CommandHandler("help", help))
         self._dp.add_handler(CommandHandler("start", start))
         self._dp.add_handler(CommandHandler("text", text))
         self._dp.add_handler(CommandHandler("audio", audio))
