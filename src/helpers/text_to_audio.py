@@ -7,7 +7,7 @@ import tempfile
 from gtts import gTTS
 
 
-def text_to_audio(text: str, lang="es") -> str:
+def text_to_audio(text: str, lang="en") -> str:
     """Convert text to audio using gTTS."""
     tts = gTTS(text, lang=lang)
     with tempfile.NamedTemporaryFile(mode="wb", suffix=".ogg", delete=False) as _f:
