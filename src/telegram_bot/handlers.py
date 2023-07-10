@@ -44,11 +44,3 @@ def handle_audio(update: Update, context: CallbackContext) -> None:
             asyncio.run( get_text_from_audio(update, context) ),
             reply_to_message_id = update.message.message_id
         )
-
-# def handle_update(update: Update, context: CallbackContext) -> None:
-#     """Echo the user message."""
-#     if "messages" not in context.user_data:
-#         context.user_data['messages'] = TEMPLATE.copy()
-#     if "send_audio" not in context.user_data:
-#         context.user_data['send_audio'] = False
-#     return False
