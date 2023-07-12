@@ -7,8 +7,9 @@ import logging
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 
 # Local application imports
-from telegram_bot.commands import audio, gpt_3, gpt_4, help, new_chat, start, text
-from telegram_bot.handlers import handle_audio, handle_text
+from src.telegram_bot.commands import (audio_command, gpt_3_command, gpt_4_command, help_command,
+                                       new_chat_command, start_command, text_command)
+from src.telegram_bot.handlers import handle_audio, handle_text
 
 
 class TelegramBot:
@@ -22,13 +23,13 @@ class TelegramBot:
 
     def setup_handlers(self):
         """Setup the handlers for the bot."""
-        self._dp.add_handler(CommandHandler("help", help))
-        self._dp.add_handler(CommandHandler("start", start))
-        self._dp.add_handler(CommandHandler("text", text))
-        self._dp.add_handler(CommandHandler("audio", audio))
-        self._dp.add_handler(CommandHandler("new", new_chat))
-        self._dp.add_handler(CommandHandler("gpt3", gpt_3))
-        self._dp.add_handler(CommandHandler("gpt4", gpt_4))
+        self._dp.add_handler(CommandHandler("help", help_command))
+        self._dp.add_handler(CommandHandler("start", start_command))
+        self._dp.add_handler(CommandHandler("text", text_command))
+        self._dp.add_handler(CommandHandler("audio", audio_command))
+        self._dp.add_handler(CommandHandler("new", new_chat_command))
+        self._dp.add_handler(CommandHandler("gpt3", gpt_3_command))
+        self._dp.add_handler(CommandHandler("gpt4", gpt_4_command))
         self._dp.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_text))
         self._dp.add_handler(MessageHandler(Filters.voice | Filters.audio, handle_audio))
 

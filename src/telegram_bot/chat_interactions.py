@@ -6,11 +6,11 @@ from telegram import Update
 from telegram.ext import CallbackContext
 
 # Local application imports
-from constants import GPT3_MODEL, TEMPLATE
-from openai_api.gpt_request import gpt_request
-from helpers.audio_to_text import audio_to_text
-from helpers.text_to_audio import text_to_audio
-from telegram_bot.decorators.send_action import send_record_voice_action, send_typing_action
+from src.constants import GPT3_MODEL, TEMPLATE
+from src.openai_api.gpt_request import gpt_request
+from src.helpers.audio_to_text import audio_to_text
+from src.helpers.text_to_audio import text_to_audio
+from src.telegram_bot.decorators.send_action import send_record_voice_action, send_typing_action
 
 
 async def sample_gpt_request(text: str, context: CallbackContext):

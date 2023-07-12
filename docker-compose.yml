@@ -4,5 +4,5 @@ services:
     build: .
     volumes:
       - .:/src
-    command: ["python", "src/main.py"]
+    command: ["python", "-m", "src.main"]
 

@@ -7,7 +7,7 @@ import json
 import aiohttp
 
 # Local application imports
-from constants import (OPENAI_API_KEY, TEMPERATURE, HTTP_OK)
+from src.constants import (OPENAI_API_KEY, TEMPERATURE, HTTP_OK)
 
 
 async def construct_request_payload(text: str, messages: list, model: str) -> dict:

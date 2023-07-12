@@ -8,9 +8,9 @@ from telegram import InputFile, Update
 from telegram.ext import CallbackContext
 
 # Local application imports
-from constants import TEMPLATE
-from telegram_bot.chat_interactions import (get_audio_from_audio, get_audio_from_text,
-                                           get_text_from_audio, get_text_from_text)
+from src.constants import TEMPLATE
+from src.telegram_bot.chat_interactions import (get_audio_from_audio, get_audio_from_text,
+                                                get_text_from_audio, get_text_from_text)
 
 
 def handle_text(update: Update, context: CallbackContext) -> None:

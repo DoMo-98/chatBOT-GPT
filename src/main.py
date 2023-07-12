@@ -1,8 +1,8 @@
 """This module contains the main function for the telegram_bot."""
 
 # Local application imports
-from constants import TELEGRAM_BOT_TOKEN
-from telegram_bot.telegram_bot import TelegramBot
+from src.constants import TELEGRAM_BOT_TOKEN
+from src.telegram_bot.telegram_bot import TelegramBot
 
 
 if __name__ == "__main__":

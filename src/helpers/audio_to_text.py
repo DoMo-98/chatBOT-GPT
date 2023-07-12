@@ -9,7 +9,7 @@ from pydub import AudioSegment
 from telegram import File
 
 # Local application imports
-from constants import (OPENAI_API_KEY, WHISPER_MODEL)
+from src.constants import (OPENAI_API_KEY, WHISPER_MODEL)
 
 
 async def download_audio(audio: File) -> BytesIO:
