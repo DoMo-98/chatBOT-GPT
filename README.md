@@ -2,6 +2,8 @@
 
 This project is a Python-based Telegram bot integrated with the OpenAI API, operating similar to ChatGPT, and offers additional audio sending features. It can be executed in a Python environment or within a Docker container for added flexibility.
 
+![chatBOT-GPT demo](./docs/chatBOT-GPT.gif)
+
 ## Prerequisites
 
 Before you begin, ensure you have met the following requirements:
