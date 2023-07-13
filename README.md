@@ -50,10 +50,10 @@ python3 generate_env.py
 
 There are two ways to start the bot:
 
-1. **Python** - Run the `main.py` file:
+1. **Python** - Run the `src.main` module:
 
 ```bash
-python3 main.py
+python3 -m src.main
 ```
 
 2. **Docker Compose** - Start the service with Docker Compose:
