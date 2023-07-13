@@ -59,7 +59,7 @@ python3 -m src.main
 2. **Docker Compose** - Start the service with Docker Compose:
 
 ```bash
-docker-compose up
+docker compose up
 ```
 
 Both methods will initiate the bot, and it will start listening for incoming messages.
